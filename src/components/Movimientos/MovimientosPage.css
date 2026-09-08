@@ -154,3 +154,37 @@
     width: 100%;
   }
 }
+
+.equipos-filtros {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0.6rem;
+}
+
+.equipos-filtros input {
+  flex: 1;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--paper-dim);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+
+.equipos-filtros select {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--paper-dim);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .equipos-filtros {
+    flex-wrap: wrap;
+  }
+
+  .equipos-filtros input,
+  .equipos-filtros select {
+    width: 100%;
+  }
+}

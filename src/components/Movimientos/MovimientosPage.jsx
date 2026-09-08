@@ -150,20 +150,32 @@ function NuevoAlquilerForm({ onCancel, onSaved }) {
   const [fechaFin, setFechaFin] = useState("");
   const [mostrarNuevoCliente, setMostrarNuevoCliente] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const [categorias, setCategorias] = useState([]);
+  const [busquedaEquipo, setBusquedaEquipo] = useState("");
+  const [filtroCategoriaEquipo, setFiltroCategoriaEquipo] = useState("");
 
   async function cargarDatos() {
-    const [{ data: clientesData }, { data: equiposData }] = await Promise.all([
+    const [{ data: clientesData }, { data: equiposData }, { data: categoriasData }] = await Promise.all([
       supabase.from("clientes").select("*").order("nombre"),
       supabase
         .from("equipos")
-        .select("id, codigo, informacion")
+        .select("id, codigo, informacion, categoria_id")
         .eq("disponibilidad", "disponible")
         .order("codigo"),
+      supabase.from("categorias").select("id, nombre").order("nombre"),
     ]);
     setClientes(clientesData ?? []);
     setEquiposDisponibles(equiposData ?? []);
+    setCategorias(categoriasData ?? []);
   }
-
+  const equiposFiltrados = equiposDisponibles.filter((eq) => {
+    if (filtroCategoriaEquipo && String(eq.categoria_id) !== filtroCategoriaEquipo) return false;
+    if (busquedaEquipo) {
+      const texto = `${eq.codigo} ${eq.informacion ?? ""}`.toLowerCase();
+      if (!texto.includes(busquedaEquipo.toLowerCase())) return false;
+    }
+    return true;
+  });
   useEffect(() => {
     cargarDatos();
   }, []);
@@ -271,9 +283,26 @@ function NuevoAlquilerForm({ onCancel, onSaved }) {
       )}
 
       <h3>Equipos disponibles</h3>
+      <div className="equipos-filtros">
+        <input
+          type="text"
+          placeholder="Buscar por código o información..."
+          value={busquedaEquipo}
+          onChange={(e) => setBusquedaEquipo(e.target.value)}
+        />
+        <select
+          value={filtroCategoriaEquipo}
+          onChange={(e) => setFiltroCategoriaEquipo(e.target.value)}
+        >
+          <option value="">Todas las categorías</option>
+          {categorias.map((c) => (
+            <option key={c.id} value={c.id}>{c.nombre}</option>
+          ))}
+        </select>
+      </div>
       <div className="equipos-checklist">
         {equiposDisponibles.length === 0 && <p>No hay equipos disponibles en este momento.</p>}
-        {equiposDisponibles.map((eq) => (
+        {equiposFiltrados.map((eq) => (
           <label key={eq.id} className="equipo-checkbox">
             <input
               type="checkbox"
